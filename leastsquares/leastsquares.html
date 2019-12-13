@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Least Squares</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+<h1>Least Squares</h1>
+<p>
+The least squares problem is to find an \(n\)-vector \(x\) which minimizes the norm of the residual \(A x - b\) for an \(m\)-vector \(b\), where \(m > n\):
+\[ \min_x \| A x - b \|^2 \]
+In general, because the problem is over-determined, there does not exist an \(x\) which exactly satisifes \(A x = b\), so we do the next best thing and minimize the residual.
+</p>
+<p>
+We can find the least squares solution via calculus setting the gradient of the cost function to zero:
+\[ f(x) = \| A x - b \|^2 \]
+\[ \nabla f(x) = 2 A^T (A x - b) \]
+\[ 2 A^T (A \hat{x} - b) = 0 \]
+\[ A^T A \hat{x} = A^T b \]
+\[ \hat{x} = (A^T A)^{-1} A^T b \]
+</p>
+The matrix \((A^T A)^{-1} A^T\) is called the pseudo-inverse of \(A\).  Note that the solution \(\hat{x}\) is the projection of \(b\) onto \(A\).  Numerically, the solution can be found using the decomposition \(A = QR\):
+\[ A^T A \hat{x} = A^T b \]
+\[ R^T Q^T Q R \hat{x} = R^T Q^T b \]
+\[ R \hat{x} = Q^T b \]
+</body>
+</html>

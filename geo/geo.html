@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>Geographic Distance</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../js/three.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+	</head>
+
+	<body>
+  <h1>Geographic Distance</h1>
+  <form>
+    <fieldset>
+      <legend>Source</legend>
+      <input type="number" id="src_latitude" value="41.49008">
+      <input type="number" id="src_longitude" value="-71.312796">
+    </fieldset>
+    <fieldset>
+      <legend>Destination</legend>
+      <input type="number" id="dst_latitude" value="41.499498">
+      <input type="number" id="dst_longitude" value="-81.695391">
+    </fieldset>
+  </form>
+  <p id="great_circle"></p>
+  <p id="equirect_proj"></p>
+  <p><input type="button" value="Calculate" onclick="calculate()"></p>
+
+  <script>
+  const earth_radius = 6371008.8 // meters
+
+  function placeObjectOnPlanet(object, lat, lon, radius) {
+    object.position.set(
+        Math.cos(lat) * Math.cos(-lon) * radius,
+        Math.sin(lat) * radius,
+        Math.cos(lat) * Math.sin(-lon) * radius
+    );
+    object.rotation.set(0.0, lon, lat - Math.PI * 0.5);
+}
+var renderer = new THREE.WebGLRenderer({antialias: true})
+renderer.setSize(640, 480)
+document.body.appendChild(renderer.domElement)
+
+var camera = new THREE.PerspectiveCamera(55, 640 / 480, 1, 1000)
+camera.position.set(0, 0, 100)
+var controls = new THREE.OrbitControls(camera, renderer.domElement)
+
+var scene = new THREE.Scene()
+
+function update() {
+scene = new THREE.Scene()
+var geometry = new THREE.SphereGeometry(32, 64, 64)
+var material = new THREE.MeshPhongMaterial({color: 0x0000ff})
+var sphere = new THREE.Mesh(geometry, material)
+
+var phi1 = document.getElementById('src_latitude').value / 180 * Math.PI
+var lambda1 = document.getElementById('src_longitude').value / 180  * Math.PI
+var src_geometry = new THREE.BoxGeometry(1, 1, 1)
+var src_material = new THREE.MeshPhongMaterial({color: 0xff0000})
+var src = new THREE.Mesh(src_geometry, src_material)
+placeObjectOnPlanet(src, phi1, lambda1, 32)
+
+var phi2 = document.getElementById('dst_latitude').value / 180 * Math.PI
+var lambda2 = document.getElementById('dst_longitude').value / 180  * Math.PI
+var dst_geometry = new THREE.BoxGeometry(1, 1, 1)
+var dst_material = new THREE.MeshPhongMaterial({color: 0x00ff00})
+var dst = new THREE.Mesh(dst_geometry, dst_material)
+placeObjectOnPlanet(dst, phi2, lambda2, 32)
+
+sphere.add(src)
+sphere.add(dst)
+var light = new THREE.PointLight()
+light.position.set(100, 100, -100)
+var ambient_light = new THREE.AmbientLight(0x404040)
+scene.add(ambient_light)
+scene.add(light)
+scene.add(sphere)
+}
+
+function animate() {
+  controls.update()
+  renderer.render(scene, camera)
+  requestAnimationFrame(animate)
+}
+
+update()
+animate()
+		</script>
+  <script>
+  function dist_equirect_proj(phi1, lambda1, phi2, lambda2) {
+    var dphi = phi2 - phi1
+    var dlambda = lambda2 - lambda1
+    var g = dlambda * Math.cos((phi1 + phi2) / 2)
+    return earth_radius * Math.sqrt(dphi * dphi + g * g)
+  }
+
+  function dist_great_circle(phi1, lambda1, phi2, lambda2) {
+    var dphi = phi2 - phi1
+    var dlambda = lambda2 - lambda1
+    var sphi = Math.sin(dphi / 2)
+    var slambda = Math.sin(dlambda / 2)
+    return earth_radius * 2 * Math.asin(Math.sqrt(sphi * sphi + Math.cos(phi1) * Math.cos(phi2) * slambda * slambda)) // haversine formula
+  }
+
+  function dist_great_circle_vector(phi1, lambda1, phi2, lambda2) {
+    var cphi1 = Math.cos(phi1)
+    var sphi1 = Math.sin(phi1)
+    var clambda1 = Math.cos(lambda1)
+    var slambda1 = Math.sin(lambda1)
+    var cphi2 = Math.cos(phi2)
+    var sphi2 = Math.sin(phi2)
+    var clambda2 = Math.cos(lambda2)
+    var slambda2 = Math.sin(lambda2)
+    var u = [cphi1 * clambda1, cphi1 * slambda1, sphi1]
+    var v = [cphi2 * clambda2, cphi2 * slambda2, sphi2]
+    return earth_radius * Math.acos(u[0] * v[0] + u[1] * v[1] + u[2] * v[2])
+  }
+
+  function calculate() {
+    var phi1 = document.getElementById('src_latitude').value / 180 * Math.PI
+    var lambda1 = document.getElementById('src_longitude').value / 180  * Math.PI
+    var phi2 = document.getElementById('dst_latitude').value / 180 * Math.PI
+    var lambda2 = document.getElementById('dst_longitude').value / 180 * Math.PI
+
+    var start = performance.now()
+    var dgc = dist_great_circle(phi1, lambda1, phi2, lambda2)
+    var end = performance.now()
+    var tgc = end - start
+
+    var start = performance.now()
+    var dep = dist_equirect_proj(phi1, lambda1, phi2, lambda2)
+    var end = performance.now()
+    var tep = end - start
+
+    document.getElementById('great_circle').innerHTML = 'Great Circle Distance: ' + dgc + ' (' + 1000 * tgc + ' us)'
+    document.getElementById('equirect_proj').innerHTML = 'Equirectangular Projection Distance: ' + dep + ' (' + 1000 * tep + ' us)'
+    dist_vector(phi1, lambda1, phi2, lambda2)
+
+    update()
+  }
+  </script>
+
+  <script>
+  calculate()
+  </script>
+
+  <h2>Explanation</h2>
+  The simple idea is to model the earth as a sphere with radius \(R\).  Latitude \(\phi\) and longitude \(\lambda\) are coordinates on this sphere.  The distance between source and destination coordinates is then the portion of the great circle between the points.  An easy calculation of the distance is then the length of the portion of the great circle spanned by the two points:
+  <p>\[d = R \cos^{-1} (u \cdot v)\]</p>
+  where \(u\) and \(v\) are unit vectors corresponding to the points.  The conversion from latitude and longitude (in radians) to unit vectors is
+  <p>\[ [\cos(\phi) \cos(\lambda), \cos(\phi) \sin(\lambda), \sin(\phi)] \]</p>
+  The number of trignometric computations can be reduced by using other formulas such as the haversine.  Also, fast approximations exist, such as the equirectangular projection result shown above.
+	</body>
+</html>
+

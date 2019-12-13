@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>Car</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../js/three.js"></script>
+    <script src="../js/OrbitControls.js"></script>
+	</head>
+
+	<body>
+  <h1>Car</h1>
+  <script>
+  class Car {
+    constructor(L, p, theta) {
+      this.L = L
+      this.p = p
+      this.theta = theta
+    }
+
+    update(dt, s, phi) {
+      this.p[0] += dt * s * Math.cos(this.theta)
+      this.p[1] += dt * s * Math.sin(this.theta)
+      this.theta += dt * s / this.L * Math.tan(phi)
+    }
+  }
+
+  var car = new Car(10, [0, 0], 0)
+  var N = 50
+  var xs = []
+  xs.push([car.p[0], car.p[1], car.theta])
+  for (let k = 0; k < N; ++k) {
+    let s = Math.random() * 10
+    let phi = 2 * (Math.random() - 0.5)
+    car.update(0.1, s, phi)
+    xs.push([car.p[0], car.p[1], car.theta])
+  }
+
+var renderer = new THREE.WebGLRenderer({antialias: true})
+renderer.setSize(800, 600)
+document.body.appendChild(renderer.domElement)
+
+var camera = new THREE.PerspectiveCamera(55, 800 / 600, 1, 200)
+camera.position.set(30, 30, 40)
+var controls = new THREE.OrbitControls(camera, renderer.domElement)
+
+var scene = new THREE.Scene()
+
+var material = new THREE.LineBasicMaterial({color: 0xff00ff})
+var geometry = new THREE.Geometry()
+  for (let k = 0; k < N; ++k) {
+    let vals = xs[k]
+    geometry.vertices.push(new THREE.Vector3(vals[0], 0, vals[1]))
+  }
+
+var line = new THREE.Line(geometry, material)
+scene.add(new THREE.GridHelper(50, 10))
+scene.add(new THREE.AxesHelper(10))
+scene.add(line)
+
+function animate() {
+  controls.update()
+  renderer.render(scene, camera)
+  requestAnimationFrame(animate)
+}
+
+animate()
+		</script>
+	</body>
+</html>
+

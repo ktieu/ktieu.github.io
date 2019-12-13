@@ -1,0 +1,117 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>LQR</title>
+  <script src="https://unpkg.com/mathjs@6.2.5/dist/math.min.js" type="text/javascript"></script>
+  <script src="https://d3js.org/d3.v4.min.js" type="text/javascript"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+path {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+</style>
+</head>
+<body>
+<h1>Linear Quadratic Regulator</h1>
+<p>
+\[ x_{t+1} = A x_t + B u_t \]
+</p>
+<p>
+\[ E(U) = \sum_{i=0}^{N-1} x_i^T Q x_i + u_i^T R u_i + x_N^T Q_f x_N \]
+</p>
+for
+<p>
+\[ Q^T = Q, Q \ge 0, Q_f^T = Q_f,  Q_f \ge 0, R^T = R, R > 0 \]
+<p>
+\[ \min_{u_0, u_1, ..., u_{N-1}} E(U) \]
+</p>  
+  <script type="text/javascript">
+    const A = math.matrix([[1, 1], [0, 1]])
+    const B = math.transpose(math.matrix([[0, 1]]))
+    const C = math.matrix([[1, 0]])
+    const Q = math.multiply(math.transpose(C), C)
+    const Qf = Q.clone()
+    const rho = 0.3
+    const dim = B.size()
+    const R = math.multiply(rho, math.identity(dim[1], dim[1]))
+    const N = 20
+    var Ps = []
+    var P = Qf.clone()
+    Ps.push(P)
+    for (let t = N; t >= 1; --t) {
+      const APA = math.multiply(math.transpose(A), math.multiply(P, A))
+      const APB = math.multiply(math.transpose(A), math.multiply(P, B))
+      const BPA = math.multiply(math.transpose(B), math.multiply(P, A))
+      const BPB = math.multiply(math.transpose(B), math.multiply(P, B))
+      const S = math.multiply(-1, math.multiply(math.inv(math.add(R, BPB)), BPA))
+      P = math.add(math.add(Q, APA), math.multiply(APB, S))
+      Ps.unshift(P)
+    }
+    var us = []
+    var xs = []
+    var x = math.matrix([1, 0])
+    xs.push(x)
+    for (let t = 0; t <= N - 1; ++t) {
+      const P = Ps[t + 1]
+      const BPA = math.multiply(math.transpose(B), math.multiply(P, A))
+      const BPB = math.multiply(math.transpose(B), math.multiply(P, B))
+      const K = math.multiply(-1, math.multiply(math.inv(math.add(R, BPB)), BPA))
+      const u = math.multiply(K, x)
+      x = math.add(math.multiply(A, x), math.multiply(B, u))
+      us.push(u)
+      xs.push(x)
+    }
+    var data = []
+    for (let t = 0; t <= N - 1; ++t) {
+      data.push({x: t, y: us[t].valueOf()[0]})
+    }
+  </script>
+<script>
+var margin = {top: 32, right: 32, bottom: 32, left: 32},
+    width = 320 - margin.left - margin.right,
+    height = 240 - margin.top - margin.bottom;
+
+var x = d3.scaleLinear().range([0, width]);
+var y = d3.scaleLinear().range([height, 0]);
+x.domain(d3.extent(data, function(d) { return d.x; }));
+y.domain(d3.extent(data, function(d) { return d.y; }));
+var xAxis = d3.axisBottom(x)
+var yAxis = d3.axisLeft(y)
+
+var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g") // g is a group element
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+var valueline = d3.line()
+    .x(function(d) { return x(d.x); })
+    .y(function(d) { return y(d.y); });
+svg.append("path")
+.attr("class", "line")
+.attr("d", valueline(data)); // d is attribute for path data
+
+svg.append("g")
+  .attr("class", "x axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis);
+
+svg.append("g")
+  .attr("class", "y axis")
+  .call(yAxis);
+</script>
+</body>
+</html>

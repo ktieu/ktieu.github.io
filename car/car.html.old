@@ -11,8 +11,6 @@
 
 	<body>
   <h1>Car</h1>
-        <p>throttle<input type="range" min="0" max="100" value="0" id="throttle"></p>
-        <p>steer<input type="range" min="-950" max="950" value="0" id="steer"></p>
   <script>
   class Car {
     constructor(L, p, theta) {
@@ -29,6 +27,15 @@
   }
 
   var car = new Car(10, [0, 0], 0)
+  var N = 50
+  var xs = []
+  xs.push([car.p[0], car.p[1], car.theta])
+  for (let k = 0; k < N; ++k) {
+    let s = Math.random() * 10
+    let phi = 2 * (Math.random() - 0.5)
+    car.update(0.1, s, phi)
+    xs.push([car.p[0], car.p[1], car.theta])
+  }
 
 var renderer = new THREE.WebGLRenderer({antialias: true})
 renderer.setSize(800, 600)
@@ -39,24 +46,20 @@ camera.position.set(30, 30, 40)
 var controls = new THREE.OrbitControls(camera, renderer.domElement)
 
 var scene = new THREE.Scene()
-var geometry = new THREE.BoxGeometry(2, 0.5, 1);
-var material = new THREE.MeshBasicMaterial({color: 0x00aaff});
-var cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+
+var material = new THREE.LineBasicMaterial({color: 0xff00ff})
+var geometry = new THREE.Geometry()
+  for (let k = 0; k < N; ++k) {
+    let vals = xs[k]
+    geometry.vertices.push(new THREE.Vector3(vals[0], 0, vals[1]))
+  }
 
 var line = new THREE.Line(geometry, material)
 scene.add(new THREE.GridHelper(50, 10))
 scene.add(new THREE.AxesHelper(10))
-var throttle = document.getElementById("throttle");
+scene.add(line)
 
 function animate() {
-  let s = throttle.value / 100
-  let phi = steer.value / 10 * Math.PI / 180
-  car.update(0.05, s, phi)
-  cube.position.set(car.p[0], 0.5, car.p[1])
-  cube.rotation.y = -car.theta
-  cube.rotation.x = 0
-  cube.rotation.z = 0
   controls.update()
   renderer.render(scene, camera)
   requestAnimationFrame(animate)

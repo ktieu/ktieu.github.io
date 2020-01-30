@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dynamic Programming</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+<h1>Dynamic Programming</h1>
+Setup
+<p>
+\[ x_{k+1} = f(x_k, u_k) \]
+\[ J(x_0; u_0, \ldots, u_{N-1}) = g_N(x_N) + \sum_{k=0}^{N-1} g_k(x_k, u_k) \]
+</p>
+
+Principle of Optimality
+Let \(u^*_0, \ldots, u^*_{N-1}\) be optimal control sequence. Then \(u^*_k, \ldots, u^*_{N-1}\) minimizes the following sub-problem:
+<p>
+\[ g_N(x_N) + g_k(x^*_k, u_k) + \sum_{m=k+1}^{N-1} g_k(x_m, u_m) \]
+</p>
+
+Solution by recursion
+<p>
+\[ J^*_N(x_N) = g_N(x_N) \]
+\[ J^*_k(x_k) = \min_{u_k} g_k(x_k, u_k) + J^*_{k+1}(f(x_k, u_k)) \]
+</p>
+</body>
+</html>

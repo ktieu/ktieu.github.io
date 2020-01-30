@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Calculus of Variations</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+<h1>Calculus of Variations</h1>
+<p>
+The calculus of variations is a way to optimize over functions.  We can think of it as the higher-dimensional analog of finding minimum points of a function using calculus.  Let's review optimization over points.  For example, consider the simple case of quadratic cost function:
+\[ f(x) = ax^2 + bx +c \]
+The basic idea is to set the derivative of \(f\) with respect to \(x\) to zero.  This gives a constraint on \(x\) with which we can find the minimizing point.
+\[ \frac{\partial f}{\partial x} = 2ax + b = 0 \]
+\[ x = -\frac{b}{2a} \]
+</p>
+<p>
+Now consider a <i>functional</i> which is a mapping from a function to a scalar.  An example functional is the integral of a function such as
+\[ F(x) = \int_{t_1}^{t_2} f(x(t)) dt = \int_{t_1}^{t_2} \frac{1}{2} m \left(\frac{dx}{dt}\right)^2 dt \]
+The basic idea in the calculus of variations is similar to that of calculus for minimum points, i.e., derive a constraint on the minimizing function with which we can find it.  Note that \(x\) is now a function.  The trick is to write the function as the sum of the minimizing function \(\hat{x}\) and a variation \(\eta\):
+\[ x(t) = \hat{x}(t) + \eta(t) \]
+Then
+\[ F(\hat{x} + \eta) = \int_{t_1}^{t_2} \frac{1}{2} m \left(\frac{d\hat{x}}{dt} + \frac{d\eta}{dt}\right)^2 dt \]
+\[ = \frac{1}{2} m \int_{t_1}^{t_2} \left(\frac{d\hat{x}}{dt}\right)^2 + 2\frac{d\hat{x}}{dt}\frac{d\eta}{dt} + \left(\frac{d\eta}{dt}\right)^2 dt \]
+\[ = F(\hat{x}) + m \int_{t_1}^{t_2} \frac{dx}{dt}\frac{d\eta}{dt} dt + \frac{1}{2} m \int_{t_1}^{t_2} \left(\frac{d\eta}{dt}\right)^2 dt \]
+</p>
+Let's take the difference between the functionals for the minimizing function and any other function, and integrate by parts the first term in the result:
+\[ \delta F = F(\hat{x} + \eta) - F(\hat{x}) \]
+\[ = m \int_{t_1}^{t_2} \frac{d\hat{x}}{dt}\frac{d\eta}{dt} + \frac{1}{2} m \int_{t_1}^{t_2} \left(\frac{d\eta}{dt}\right)^2 dt \]
+\[ = m \left. \frac{d\hat{x}}{dt} \eta(t) \right\rvert_{t_1}^{t_2} - m \int_{t_1}^{t_2} \frac{d^2\hat{x}}{dt} \eta dt + \frac{1}{2} m \int_{t_1}^{t_2} \left(\frac{d\eta}{dt}\right)^2 dt \]
+Now let's set the boundary conditions \(\eta(t_2) = \eta(t_1) = 0\) so that \(x(t_1) = \hat(t_1)\) and \(x(t_2) = \hat(x)(t_2)\), and ignore second-order terms of \(d\eta/dt\):
+\[ \delta F = \int_{t_1}^{t_2} -m \frac{d^2\hat{x}}{dt} \eta dt = 0 \]
+Because the above constraint must hold for any \(\eta\) we have
+\[ -m \frac{d^2\hat{x}}{dt} = 0 \]
+which implies that \(\hat{x}\) must be a constant.  The functional \(F\) that we have been working with is the kinetic energy of a particle's path \(x(t)\), and what we've shown is that the path with minimal kinetic energy has constant velocity.
+</body>
+</html>

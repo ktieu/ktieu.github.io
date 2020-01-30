@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Multi-Armed Bandit</title>
+</head>
+
+<body>
+<script>
+class Random {
+    constructor(numArms) {
+        this.numArms = numArms;
+    }
+
+    act() {
+        return Math.floor(Math.random() * this.numArms);
+    }
+
+    update(reward) {
+    }
+}
+
+class EpsilonGreedy {
+    constructor(numArms) {
+        this.epsilon = 0.1;
+        this.Q = [];
+        this.n = [];
+        for (let u = 0; u < numArms; ++u) {
+            this.Q.push(0.0);
+            this.n.push(0);
+        }
+    }
+
+    act() {
+        if (Math.random() < this.epsilon) {
+            this.action = Math.floor(Math.random() * this.Q.length);
+        }
+        else {
+            let bestAction = -1;
+            let maxProb = -1.0;
+            let rewardProbs = [];
+            for (let u = 0; u < this.Q.length; ++u) {
+                if (this.Q[u] > maxProb) {
+                    maxProb = this.Q[u];
+                    bestAction = u;
+                }
+            }
+            this.action = bestAction;
+        }
+        return this.action;
+    }
+
+    update(reward) {
+        ++(this.n[this.action]);
+        this.Q[this.action] += (reward - this.Q[this.action]) / this.n[this.action];
+    }
+}
+
+function run() {
+    let numArms = parseInt(document.getElementById("numArms").value);
+    let lockProbs = document.getElementById("lockProbs").checked;
+    let rewardProbs = [];
+    if (lockProbs) {
+        rewardProbs = document.getElementById("rewardProbs").innerHTML.split(',').map(function(item) { return parseFloat(item); });
+    }
+    else {
+        for (let i = 0; i < numArms; ++i) {
+            rewardProbs.push(Math.random());
+        }
+    }
+
+    let controller = document.getElementById("controller").value;
+    let agent;
+    if (controller == "random") {
+        agent = new Random(numArms);
+    }
+    else if (controller == "epsilonGreedy") {
+        agent = new EpsilonGreedy(numArms);
+    }
+
+    let numStages = parseInt(document.getElementById("numStages").value);
+    let totalReward = 0;
+    for (let k = 0; k < numStages; ++k) {
+        let action = agent.act();
+        let reward = Math.random() < rewardProbs[action] ? 1 : 0;
+        agent.update(reward);
+        totalReward += reward;
+    }
+
+    document.getElementById("rewardProbs").innerHTML = rewardProbs.toString();
+    document.getElementById("totalReward").innerHTML = totalReward.toString();
+}
+</script>
+
+<h1>Multi-armed Bandit</h1>
+
+<p><label for="numArms">number of arms:</label> <input type="text" id="numArms" value="3"></p>
+<p>reward probabilities: <span id="rewardProbs"></span> <input type="checkbox" id="lockProbs"><label for="lockProbs">Lock Probabalities</label></p>
+<p>controller:
+<select id="controller">
+<option value="random">Random</option>
+<option value="epsilonGreedy">Epsilon Greedy</option>
+</select>
+</p>
+<p><label for="numStages">number of stages:</label> <input type="text" id="numStages" value="1000"></p>
+
+<p>total reward: <span id="totalReward"></span></p>
+
+<button onmouseup="run()">Run</button>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <title>Decision Theory</title>
+</head>
+
+<body>
+<h1>Decision Theory</h1>
+Free will is the ability to control one's actions.  The philosophical question on free will is whether we have it or not.
+
+Assuming we can control our actions, the engineering question is then how should we do it.  This is answered by decision theory.
+
+Imagine that you are at a birthday party, and that there is ice cream for dessert with two choices: vanilla or chocolate.
+Which flavor should you choose?  That of course depends on your preferences.  If you are indifferent, then it doesn't matter which flavor you choose.
+However, if you prefer vanilla over chocolate, then you choose vanilla.  A convenient way to model this situation is to say that you have two actions:
+<ol>
+<li>\(a_1\) for vanilla
+<li>\(a_2\) for chocolate
+</ol>
+and that with each choice comes a cost (e.g., disappointment) so:
+<ol>
+<li>\(c_1 = g(a_1) = 0\) for vanilla
+<li>\(c_2 = g(a_2) = 1\) for chocolate
+</ol>
+where \(g\) is the cost function for an action.
+Then the best choice is the one with minimum cost, namely \(a_1\) because \(c_1 \le c_2 \).  So the optimal control decision rule is,
+\[ u^* = \arg \min_a g(a) \]
+In our case \(u^* = a_1\) because \(a_1\) is the argument \(a\) in the above equation which gives the minimum cost \(g(a)\).
+
+<h2>Uncertainty</h2>
+[Need an example with prior probabilities of states of nature only, and then add experiment to obtain posterior on state of nature].
+
+Statistics can be viewed as the study of choosing actions under uncertainty.
+
+<h2>Sequential Actions</h2>
+
+<h1>References</h1>
+<ol>
+<li>Chernoff, H. and Moses, L.  (1959)  Elementary Decision Theory.  John Wiley.
+</ol>
+</body>
+</html>

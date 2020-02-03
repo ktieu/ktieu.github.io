@@ -9,15 +9,14 @@
 <body>
 <h1>Least Squares</h1>
 <p>
-The least squares problem is to find an \(n\)-vector \(x\) which minimizes the norm of the residual \(A x - b\) for an \(m\)-vector \(b\), where \(m > n\):
-\[ \min_x \| A x - b \|^2 \]
-In general, because the problem is over-determined, there does not exist an \(x\) which exactly satisifes \(A x = b\), so we do the next best thing and minimize the residual.
+The least squares problem is to find an \(n\)-vector \(x\) which minimizes the norm of the residual \(Ax - b\) for an \(m\)-vector \(b\), where \(m > n\):
+\[ \min_x \| Ax - b \|^2 \]
+In general, because the problem is over-determined, there does not exist an \(x\) which exactly satisifes \(Ax = b\), so we do the next best thing and minimize the residual.
 </p>
 <p>
 We can find the least squares solution via calculus setting the gradient of the cost function to zero:
-\[ f(x) = \| A x - b \|^2 \]
-\[ \nabla f(x) = 2 A^T (A x - b) \]
-\[ 2 A^T (A \hat{x} - b) = 0 \]
+\[ f(x) = \| Ax - b \|^2 \]
+\[ 0 = 2 A^T (A \hat{x} - b) \]
 \[ A^T A \hat{x} = A^T b \]
 \[ \hat{x} = (A^T A)^{-1} A^T b \]
 </p>
@@ -29,6 +28,47 @@ The matrix \((A^T A)^{-1} A^T\) is called the pseudo-inverse of \(A\).  Note tha
 <h2>Matrix Least Squares</h2>
 
 <h1>Constrained Least Squares</h1>
+<p>
+The constrained least squares problem is to find an \(n\)-vector \(x\) which minimizes the norm of the residual \(Ax - b\) for an \(m\)-vector \(b\), where \(m > n\), and which satisifies a linear constraint:
+\[ \min_x \| Ax - b \|^2 \]
+\[\textrm{subject to} \quad C x = d \]
+</p>
+Similarly to least squares, we can use calculus on the Lagrangian:
+\[ L(x) = \| Ax - b \|^2 + z^T(Cx-d) \]
+\[ 0 = 2 A^T (A\hat{x} - b) + C^T \hat{z} \]
+\[ 0 = 2 A^T A\hat{x} - 2A^T b + C^T \hat{z} \]
+We can write the above condition which are called the KKT equations in matrix form:
+\[
+\begin{bmatrix}
+2A^T A & C^T \\
+C & 0
+\end{bmatrix}
+\begin{bmatrix}
+\hat{x} \\
+\hat{z}
+\end{bmatrix}
+=
+\begin{bmatrix}
+2A^T b \\
+d
+\end{bmatrix}
+\]
+Numerically, similarly to least squares, we can use a QR decomposition:
+\[
+\begin{bmatrix}
+A \\
+C
+\end{bmatrix}
+=
+\begin{bmatrix}
+Q_1 \\
+Q_2
+\end{bmatrix}
+\begin{bmatrix}
+R
+\end{bmatrix}
+\]
+
 
 <h1>Nonlinear Least Squares</h1>
 </body>

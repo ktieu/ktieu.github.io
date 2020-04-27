@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prisoner's Dilemma</title>
+  <style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px;
+  }
+  tr:nth-child(even) {background-color: #e0e0e0;}
+  </style>
+</head>
+
+<body id="body">
+<script>
+class Player {
+    constructor() {
+        this.score = 0;
+    }
+
+    update(points) {
+        this.score += points;
+    }
+}
+
+class Random extends Player {
+    act(opponentMove) {
+        if (Math.random() <= 0.5) {
+            return 'cooperate';
+        }
+        else {
+            return 'defect';
+        }
+    }
+}
+
+class AlwaysDefect extends Player {
+    act(opponentMove) {
+            return 'defect';
+    }
+}
+
+class TitForTat extends Player {
+    constructor() {
+        super();
+        this.opponentPrevMove = '';
+    }
+
+    act() {
+        if (this.opponentPrevMove == 'defect') {
+            return 'defect';
+        }
+        else {
+            return 'cooperate';
+        }
+    }
+
+    update(points, opponentMove) {
+        super.update(points);
+        this.opponentPrevMove = opponentMove;
+    }
+}
+
+class Grofman extends Player {
+    constructor() {
+        super();
+        this.prevMove = '';
+        this.opponentPrevMove = '';
+    }
+
+    act() {
+        let move = 'cooperate';
+        if (this.prevMove != this.opponentPrevMove) {
+            if (Math.random() <= 2 / 7) {
+                move = 'cooperate';
+            }
+            else {
+                move = 'defect';
+            }
+        }
+        this.prevMove = move;
+        return move;
+    }
+
+    update(points, opponentMove) {
+        super.update(points);
+        this.opponentPrevMove = opponentMove;
+    }
+}
+
+class Davis extends Player {
+    constructor() {
+        super();
+        this.numMoves = 0;
+        this.defect = false;
+    }
+
+    act() {
+        let move = 'cooperate';
+        if (this.numMoves >= 10 && this.defect) {
+            move = 'defect';
+        }
+        ++this.numMoves;
+        return move;
+    }
+
+    update(points, opponentMove) {
+        super.update(points);
+        if (opponentMove == 'defect') {
+            this.defect = true;
+        }
+    }
+}
+
+class Friedman extends Player {
+    constructor() {
+        super();
+        this.defect = false;
+    }
+
+    act() {
+        if (this.defect) {
+            return 'defect';
+        }
+        else {
+            return 'cooperate';
+        }
+    }
+
+    update(points, opponentMove) {
+        super.update(points);
+        if (opponentMove == 'defect') {
+            this.defect = true;
+        }
+    }
+}
+
+class Feld extends Player {
+    constructor() {
+        super();
+        this.opponentPrevMove = '';
+        this.prob = 1.0;
+    }
+
+    act() {
+        if (this.opponentPrevMove == '') {
+            return 'cooperate';
+        }
+        else if (this.opponentPrevMove == 'cooperate') {
+            if (Math.random() <= this.prob) {
+                this.prob -= 0.0025;
+                return 'cooperate';
+            }
+            else {
+                this.prob -= 0.0025;
+                return 'defect';
+            }   
+        }
+        else {
+            return 'defect';
+        }
+    }
+
+    update(points, opponentMove) {
+        super.update(points);
+        this.opponentPrevMove = opponentMove;
+    }
+}
+
+class Joss extends Player {
+    constructor() {
+        super();
+        this.opponentPrevMove = '';
+    }
+
+    act() {
+        if (this.opponentPrevMove == 'cooperate') {
+            if (Math.random() <= 0.9) {
+                return 'cooperate';
+            }
+            else {
+                return 'defect';
+            }
+        }
+        else {
+            return 'defect';
+        }
+    }
+
+    update(points, opponentMove) {
+        super.update(points);
+        this.opponentPrevMove = opponentMove;
+    }
+}
+
+function createPlayer(player) {
+    if (player == 'TIT FOR TAT') {
+        return new TitForTat();
+    }
+    else if (player == 'DEFECT') {
+        return new AlwaysDefect();
+    }
+    else if (player == 'RANDOM') {
+        return new Random();
+    }
+    else if (player == 'GROFMAN') {
+        return new Grofman();
+    }
+    else if (player == 'FRIEDMAN') {
+        return new Friedman();
+    }
+    else if (player == 'DAVIS') {
+        return new Grofman();
+    }
+    else if (player == 'FELD') {
+        return new Feld();
+    }
+    else if (player == 'JOSS') {
+        return new Joss();
+    }
+}
+
+function score(move1, move2) {
+    let reward = 3;
+    let temptation = 5;
+    let sucker = 0;
+    let punishment = 1;
+
+    if (move1 == 'cooperate' && move2 == 'cooperate') {
+        return [reward, reward];
+    }
+    else if (move1 == 'cooperate' && move2 == 'defect') {
+        return [sucker, temptation];
+    }
+    else if (move1 == 'defect' && move2 == 'cooperate') {
+        return [temptation, sucker];
+    }
+    else {
+        return [punishment, punishment];
+    }
+}
+
+function play(player1, player2, numMoves) {
+    let move1 = '';
+    let move2 = '';
+
+    for (let t = 0; t < numMoves; ++t) {
+        move1 = player1.act();
+        move2 = player2.act();
+
+        pts = score(move1, move2);
+
+        player1.update(pts[0], move2);
+        player2.update(pts[1], move1);
+    }
+
+    return [player1.score, player2.score];
+}
+
+function average(scores) {
+    let total = 0;
+    for (let i = 0; i < scores.length; ++i) {
+        total += scores[i];
+    }
+    return total / scores.length;
+}
+
+function run() {
+    let players = ['TIT FOR TAT', 'GROFMAN', 'FRIEDMAN', 'DAVIS', 'FELD', 'JOSS', 'RANDOM'];
+
+    let numMoves = 200;
+    let scores = [];
+
+    for (let i = 0; i < players.length; ++i) {
+        let iscores = [];
+        for (let j = 0; j < players.length; ++j) {
+            playeri = createPlayer(players[i]);
+            playerj = createPlayer(players[j]);
+            scoreij = play(playeri, playerj, numMoves);
+            iscores.push(scoreij[0])
+        }
+        scores.push(iscores);
+    }
+
+    let table = document.getElementById('scores');
+    if (table) {
+        table.remove();
+    }
+    table = document.createElement('table');
+    table.setAttribute('id', 'scores');
+    document.getElementById('table').appendChild(table);
+    let caption = table.createCaption();
+    caption.innerHTML = 'Scores';
+    let body = table.createTBody();
+
+    let headRow = document.createElement('tr');
+    body.appendChild(headRow);
+    headRow.insertCell();
+    for (let i = 0; i < players.length; ++i) {
+        let cell = headRow.insertCell();
+        cell.innerHTML = players[i];
+    }
+    let cell = headRow.insertCell();
+    cell.innerHTML = 'Average';
+
+    for (let i = 0; i < players.length; ++i) {
+        let row = document.createElement('tr');
+        let cell = row.insertCell();
+        cell.innerHTML = players[i];
+        body.appendChild(row);
+        for (let j = 0; j < players.length; ++j) {
+            cell = row.insertCell();
+            cell.innerHTML = scores[i][j];
+        }
+        cell = row.insertCell();
+        cell.innerHTML = average(scores[i]);
+    }
+}
+</script>
+
+<h1>Iterated Prisoner's Dilemma</h1>
+
+<h2>Simulation</h2>
+<p><button onmouseup="run()">Run</button></p>
+<div id="table">
+</div>
+
+<h2>References</h2>
+<p>Axelrod, Robert. (1984). The Evolution of Cooperation.</p>
+</body>
+</html>

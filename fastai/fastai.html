@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>fastai Tricks</title>
+</head>
+<body>
+<h1>fastai Tricks</h1>
+transfer learning
+
+fine-tuning 
+
+learning rate scheduling
+
+data augmentation
+
+practicality
+.to_fp16()
+
+top-level api hides a lot of ML details.  common api for different tasks
+
+covers classification, multi-label, regression, segmentation, detection, text, tabular, collaborative filtering
+
+good defaults for parameters, etc.
+
+uses state-of-the-art models and techniques
+
+coarse to fine multi-resolution training
+
+progressive fine-tuning for text, starting from last layer and back one layer at a time
+
+discriminative learning rates
+
+torch
+Dataset
+DataLoader(Dataset, batch_size=1)
+
+fastai
+DataBunch(train_dl:DataLoader, valid_dl:DataLoader)  and data block API.  binds dataloaders for train and validation
+
+data = ImageDataBunch.from_folder(path, ds_tfms=tfms, size=224)
+
+data = (ImageFileList.from_folder(path)
+.label_from_folder()
+.split_by_folder()
+.add_test_folder()
+.datasets()
+.transform(tfms, size=224)
+.databunch())
+
+data.train_ds[0] = (Image (3, 224, 224), 0)
+data.vaid_ds.classes = ['3', '7']
+</html>

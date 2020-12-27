@@ -1,0 +1,96 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Optimization</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+
+<h1>Optimization</h1>
+
+<p>
+Optimization can be viewed as the process of finding the best action to a decision problem.
+</p>
+
+<h1>Discrete Decision</h1>
+
+<h2>Pandemic Example</h2>
+<p>
+Consider a pandemic, where although asymptomatic, you
+have tested positive for the disease.  Your decision problem is to decide
+between two actions: \( A \) (do nothing), or \( B \) (seek treatment).  The results of your
+action are distinguish by losses associated with the four possibilities:
+</p>
+
+<table>
+<tr><th></th><th>clean</th><th>infected</th></tr>
+<tr><td>\( A \)</td><td>0</td><td>1</td>
+<tr><td>\( B \)</td><td>0.1</td><td>0.3</td>
+</table>
+
+<p>
+Intuitively, if you are likely to be infected given a positive test, then seeking treatment
+makes sense.  On the contrary, if it is still unlikely that you are infected, then the best
+thing to do is probably nothing.  In fact, from the table above, it is obvious that if you
+are infected, then doing nothing incurs a larger cost; simiarly, if you are clean, then
+seeking treatment has a larger cost.
+</p>
+
+<h2>Formalization</h2>
+
+<p>
+To formalize the decision problem, we associate a single, numerical cost with each action \( f(\cdot) \), and
+then optimize by choosing an action with minimum cost.
+</p>
+
+<p>
+For convenience we define the cost of an action as the expected loss based on the table above:
+
+\[ \begin{align}
+f(A) & = 0 \cdot P(\textrm{clean | positive}) + 1 \cdot P(\textrm{infected | positive}) \\
+f(B) & = 0.1 \cdot P(\textrm{clean | positive}) + 0.3 \cdot P(\textrm{infected | positive})
+\end{align} \]
+</p>
+
+<p>
+Assume that the prior probability of infection is very low, while the true and false positive rates are high and low, respectively:
+
+\[ \begin{align}
+P(\textrm{infected}) &= 0.0001 \\
+P(\textrm{positive} | \textrm{infected}) &= 0.95 \\
+P(\textrm{positive} | \textrm{clean}) &= 0.01
+\end{align}
+\]
+</p>
+
+<h2>Bayes's Rule</h2>
+
+With Bayes's Rule, we can calculate the posterior probability of being infected
+given a positive test result:
+
+\[ \begin{align}
+P(\textrm{infected | positive}) &= \frac{P(\textrm{positive | infected}) P(\textrm{infected})}{P(\textrm{positive})} \\
+&= \frac{P(\textrm{positive, infected})}{P(\textrm{positive, infected}) + P(\textrm{positive, clean})} \\
+&= \frac{1}{1 + \frac{P(\textrm{positive, clean})}{P(\textrm{positive, infected})}} \\
+&= \frac{1}{1 + \frac{0.009999}{0.000095}} \\
+&= 0.009412
+\end{align} \]
+
+<h2>Optimal Decision</h2>
+
+<p>
+The costs can now be computed:
+\[ \begin{align}
+f(A) & = 0 \cdot (1 - 0.009412) + 1 \cdot 0.009412 = 0.009412 \\
+f(B) & = 0.1 \cdot (1 - 0.009412) + 0.3 \cdot 0.009412 = 0.1019
+\end{align} \]
+</p>
+
+Thus, the optimal action is \( A \) (do nothing).  The reason that \( f(A) \) is much lower than \( f(B) \) is because
+the posterior probability of infection given a positive test result is still low, less than one percent.  And the
+reason that this probability is low despite a positive test is because the prior probability of infection is a very low \( 10^{-4} \).
+
+</body>
+</html>

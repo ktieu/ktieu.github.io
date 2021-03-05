@@ -41,7 +41,7 @@ seeking treatment has a larger cost.
 <h2>Formalization</h2>
 
 <p>
-To formalize the decision problem, we associate a single, numerical cost with each action \( f(\cdot) \), and
+To formalize the decision problem, we associate a single, numerical cost with each action \( J(\cdot) \), and
 then optimize by choosing an action with minimum cost.
 </p>
 
@@ -49,8 +49,8 @@ then optimize by choosing an action with minimum cost.
 For convenience we define the cost of an action as the expected loss based on the table above:
 
 \[ \begin{align}
-f(A) & = 0 \cdot P(\textrm{clean | positive}) + 1 \cdot P(\textrm{infected | positive}) \\
-f(B) & = 0.1 \cdot P(\textrm{clean | positive}) + 0.3 \cdot P(\textrm{infected | positive})
+J(A) & = 0 \cdot P(\textrm{clean | positive}) + 1 \cdot P(\textrm{infected | positive}) \\
+J(B) & = 0.1 \cdot P(\textrm{clean | positive}) + 0.3 \cdot P(\textrm{infected | positive})
 \end{align} \]
 </p>
 
@@ -83,14 +83,65 @@ P(\textrm{infected | positive}) &= \frac{P(\textrm{positive | infected}) P(\text
 <p>
 The costs can now be computed:
 \[ \begin{align}
-f(A) & = 0 \cdot (1 - 0.009412) + 1 \cdot 0.009412 = 0.009412 \\
-f(B) & = 0.1 \cdot (1 - 0.009412) + 0.3 \cdot 0.009412 = 0.1019
+J(A) & = 0 \cdot (1 - 0.009412) + 1 \cdot 0.009412 = 0.009412 \\
+J(B) & = 0.1 \cdot (1 - 0.009412) + 0.3 \cdot 0.009412 = 0.1019
 \end{align} \]
 </p>
 
-Thus, the optimal action is \( A \) (do nothing).  The reason that \( f(A) \) is much lower than \( f(B) \) is because
+Thus, the optimal action is \( A \) (do nothing).  The reason that \( J(A) \) is much lower than \( J(B) \) is because
 the posterior probability of infection given a positive test result is still low, less than one percent.  And the
 reason that this probability is low despite a positive test is because the prior probability of infection is a very low \( 10^{-4} \).
+
+<h2>Summary</h2>
+
+In theory, discrete optimization is very simple: compute the costs for each choice and select the one
+with minimum cost.  In practice, the problem is that the number of choices can be very large.
+
+<h2>Demo</h2>
+
+<script>
+function Update() {
+  const prior = parseFloat(document.getElementById("prior").value);
+  const sensitivity = parseFloat(document.getElementById("sensitivity").value);
+  const false_alarm = parseFloat(document.getElementById("false_alarm").value);
+  document.getElementById("posterior").value = 1.0 / (1.0 + (false_alarm * (1 - prior)) / (sensitivity * prior));
+}
+</script>
+
+<table>
+<tr>
+<th>\( P(\textrm{infected}) \)</th>
+<th>\( P(\textrm{positive | infected}) \)</th>
+<th>\( P(\textrm{positive | clean}) \)</th>
+<th>\( P(\textrm{infected | positive}) \)</th>
+</tr>
+<tr>
+<td><input type="text" id="prior" value="0.0001" onchange="Update()"></td>
+<td><input type="text" id="sensitivity" value="0.95" onchange="Update()"></td>
+<td><input type="text" id="false_alarm" value="0.01" onchange="Update()"></td>
+<td><input type="text" id="posterior" value="" readonly></td>
+</tr>
+</table>
+
+<script>
+Update();
+</script>
+
+<h1>Multi-Stage Decisions</h1>
+
+Let's generalize discrete decision problems in the previous section to multi-stage decisions.
+For example, let there be \( N \) stages, where each stage has \( N \) possible actions. Now the entire
+decision problem actually has \( M^N \) possibilities!  In principle, the idea is the same:
+choose the action with minimum cost.  The problem now is that it may take a very long time to compute
+the cost of each action.
+
+<h2>Decoding Example</h2>
+
+Consider a communication scenario where the task is to decode a word given a sequence of letters.
+Even if we only consider four-letter words, there are \( 26^4 \) or over 400,000 possibilities.  Using the trick of
+only allowing legal English words narrows things down considerably, but still leaves about 4,000 possibilities.
+
+<h2>Formalization</h2>
 
 </body>
 </html>
